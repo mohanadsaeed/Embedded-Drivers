@@ -94,7 +94,6 @@
 ------------------------------------------------------------------------------------------*/
 #define BIT_IS_SET(REG,BIT) ( REG & (1<<BIT) )
 
-/* Check if a specific bit is cleared in any register and return true if yes */
 /* -----------------------------------------------------------------------------------------
 [MACRO NAME]   :	BIT_IS_CLEAR
 [DESCRIPTION]  :	This macro is responsible for checking if a specific bit is clear in any 
