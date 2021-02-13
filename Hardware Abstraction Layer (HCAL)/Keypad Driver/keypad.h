@@ -12,7 +12,7 @@
 #define KEYPAD_H
 
 #include "std_types.h"
-#include "avr_config.h"
+#include "micro_config.h"
 #include "common_macros.h"
 
 /* -----------------------------------------------------------------------------
