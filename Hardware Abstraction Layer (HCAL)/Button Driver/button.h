@@ -24,42 +24,15 @@
 /* Button Port Configurations */
 #define BUTTON_PORT_IN PINA
 #define BUTTON_PORT_OUT PORTA
+#define BUTTON_PORT_DIR DDRA
 #define BUTTON_PIN 5
-
-#define BUTTON_IS_PRESSED /
-	#ifdef PULL_UP /
-		BIT_IS_CLEAR(BUTTON_PORT_IN,BUTTON_PIN) /
-	#endif /
-	/
-	#ifdef PULL_DOWN /
-		BIT_IS_SET(BUTTON_PORTIN,BUTTON_PIN) /
-	#endif /
-	
-#define BUTTON_IS_RELEASED /
-	#ifdef PULL_UP /
-		BIT_IS_SET(BUTTON_PORTIN,BUTTON_PIN) /
-	#endif /
-	/
-	#ifdef PULL_DOWN /
-		BIT_IS_CLEAR(BUTTON_PORT_IN,BUTTON_PIN) /
-	#endif /
-	
-#define BUTTON_PULL_UP_ACTIVATE SET_BIT(BUTTON_PORT_OUT,BUTTON_PIN)
-
-
 
 /* -----------------------------------------------------------------------------
  *                      Functions Prototypes                                   *
-/* -----------------------------------------------------------------------------
-
-/*
- * Function responsible for getting if the button is pressed or not
- */
+/* -----------------------------------------------------------------------------*/
+void BUTTON_init(void);
 uint8 BUTTON_isPressed(void);
-
-/*
- * Function responsible for getting if the button is released or not
- */
 uint8 BUTTON_isReleased(void);
+void BUTTON_PULL_UP_ACTIVATE(void);
 
 #endif
