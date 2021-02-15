@@ -43,7 +43,7 @@ ISR(TIMER1_CAPT_vect)
 void ICU_init(const Icu_ConfigType * Config_Ptr)
 {
 	/* Configure ICP1/PD6 as i/p pin */
-	DDRD &= ~(1<<PD6);
+	CLEAR_BIT(DDRD,PD6);
 
 	/* Timer1 always operates in Normal Mode */
 	TCCR1A = (1<<FOC1A) | (1<<FOC1B);
@@ -52,11 +52,11 @@ void ICU_init(const Icu_ConfigType * Config_Ptr)
 	 * insert the required clock value in the first three bits (CS10, CS11 and CS12)
 	 * of TCCR1B Register
 	 */
-	TCCR1B = (TCCR1B & 0xF8) | (Config_Ptr->clock);
+	TCCR1B = (TCCR1B & NUM_TO_CLEAR_FIRST_3_BITS) | (Config_Ptr->clock);
 	/*
      * insert the required edge type in ICES1 bit in TCCR1B Register
 	 */
-	TCCR1B = (TCCR1B & 0xBF) | ((Config_Ptr->edge)<<6);
+	TCCR1B = (TCCR1B & NUM_TO_CLEAR_6TH_BIT) | ((Config_Ptr->edge) << BIT6);
 
 	/* Initial Value for Timer1 */
 	TCNT1 = 0;
@@ -85,7 +85,7 @@ void ICU_setEdgeDetectionType(const Icu_EdgeType a_edgeType)
 	/*
 	 * insert the required edge type in ICES1 bit in TCCR1B Register
 	 */
-	TCCR1B = (TCCR1B & 0xBF) | (a_edgeType<<6);
+	TCCR1B = (TCCR1B & NUM_TO_CLEAR_6TH_BIT) | (a_edgeType << BIT6);
 }
 
 /*
