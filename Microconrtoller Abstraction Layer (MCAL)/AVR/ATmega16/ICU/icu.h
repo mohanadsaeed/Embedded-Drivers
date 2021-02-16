@@ -41,6 +41,7 @@ typedef struct
 #define NUM_TO_CLEAR_FIRST_3_BITS 0xF8
 #define NUM_TO_CLEAR_6TH_BIT 0xBF
 #define BIT6 6
+#define NULL_PTR (void *) 0
 
 /* -----------------------------------------------------------------------------
  *                      Functions Prototypes                                   *
