@@ -42,12 +42,13 @@ ISR(INT2_vect){
  *                      Functions Definitions                                  *
  ------------------------------------------------------------------------------*/
 
+/* Function to initialize interrupt registers*/
 void INT0_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
-	 * 	n=0: Falling edge generates interrupt
-	 * 	n=1: Raising edge generates interrupt
-	 * 	n=2: Low level generates interrupt
-	 * 	n=3: Logical change generates interrupt
+	 * Low level generates interrupt
+	 * Logical change generates interrupt
+	 * Falling edge generates interrupt
+	 * Raising edge generates interrupt
 	 */
 	MCUCR = (MCUCR & NUM_TO_CLEAR_FIRST_2_BITS) |\
 			(Config_Ptr -> interruptevent & NUM_TO_CLEAR_LAST_6_BITS);
@@ -63,10 +64,10 @@ void INT0_init(const Ei_ConfigType * Config_Ptr){
 
 void INT1_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
-	 * 	n=0: Falling edge generates interrupt
-	 * 	n=1: Rising edge generates interrupt
-	 * 	n=2: Low level generates interrupt
-	 * 	n=3: Logical change generates interrupt
+	 * Low level generates interrupt
+	 * Logical change generates interrupt
+	 * Falling edge generates interrupt
+	 * Raising edge generates interrupt
 	 */
 	MCUCR = (MCUCR & NUM_TO_CLEAR_SECOND_2_BITS) |\
 			((Config_Ptr -> interruptevent & NUM_TO_CLEAR_LAST_6_BITS) << BIT2);
@@ -82,10 +83,10 @@ void INT1_init(const Ei_ConfigType * Config_Ptr){
 
 void INT2_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
-	 * 	n=0: Falling edge generates interrupt
-	 * 	n=1: Rising edge generates interrupt
+	 * Falling edge generates interrupt
+	 * Raising edge generates interrupt
 	 */
-	MCUCSR = (MCUCR & NUM_TO_CLEAR_6TH_BITS) |\
+	MCUCSR = (MCUCR & NUM_TO_CLEAR_6TH_BIT) |\
 			((((Config_Ptr -> interruptevent)-2) & NUM_TO_CLEAR_LAST_6_BITS) << BIT6);
 
 	//Configure INT2 pin as input
@@ -97,6 +98,7 @@ void INT2_init(const Ei_ConfigType * Config_Ptr){
 	SET_BIT(GICR,INT2);
 }
 
+/* Function to select the event at which the interrupt will be triggered*/
 void INT0_setEvent(const Ei_InterruptEvent a_int0Event){
 	/*
 	 * insert the required event in MCUCR Register
@@ -117,10 +119,11 @@ void INT2_setEvent(const Ei_InterruptEvent a_int2Event){
 	/*
 	 * insert the required event in MCUCSR Register
 	 */
-	MCUCSR = (MCUCR & NUM_TO_CLEAR_6TH_BITS) |\
+	MCUCSR = (MCUCR & NUM_TO_CLEAR_6TH_BIT) |\
 			((((a_int2Event)-2) & NUM_TO_CLEAR_LAST_6_BITS) << BIT6);
 }
 
+/* Function to save the of the call back function in a global variable*/
 void INT0_setCallBack(void(*a_ptr)(void)){
 	/* Save the address of the Call back function in a global variable */
 	g_callBackPtrInt0 = a_ptr;
@@ -136,6 +139,7 @@ void INT2_setCallBack(void(*a_ptr)(void)){
 	g_callBackPtrInt2 = a_ptr;
 }
 
+/* Function to de initializa interrupts registers*/
 void INT0_deInit(void){
 	//Module Interrupt Disable
 	CLEAR_BIT(GICR,INT0);
