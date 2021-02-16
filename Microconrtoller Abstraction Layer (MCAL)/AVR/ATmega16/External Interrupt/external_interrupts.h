@@ -44,9 +44,8 @@ typedef struct
 #define NUM_TO_CLEAR_2ND_BIT 0xFD
 #define NUM_TO_CLEAR_LAST_7_BIT 0x01
 #define NUM_TO_CLEAR_3RD_BIT 0xFB
-#define NUM_TO_CLEAR_6TH_BITS 0xBF
+#define NUM_TO_CLEAR_6TH_BIT 0xBF
 #define BIT2 2
-#define NUM_TO_CLEAR_6TH_BITS 0xBF
 #define BIT6 6
 #define NULL_PTR (void *) 0
 
