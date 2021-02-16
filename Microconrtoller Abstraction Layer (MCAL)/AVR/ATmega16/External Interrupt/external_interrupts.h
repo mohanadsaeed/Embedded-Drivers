@@ -18,7 +18,7 @@
 /* -----------------------------------------------------------------------------
  *                         Types Declaration                                   *
  ------------------------------------------------------------------------------*/
- typedef enum
+typedef enum
 {
 	LOW_LEVEL,LOGICAL_CHANGE,FALLING_EDGE,RISING_EDGE
 }Ei_InterruptEvent;
@@ -34,17 +34,23 @@ typedef struct
 	Ei_PullUp pullup;
 }Ei_ConfigType;
 
- 
+
 /* -----------------------------------------------------------------------------
  *                           Preprocessor                                      *
   -----------------------------------------------------------------------------*/
-  #define NUM_TO_CLEAR_FIRST_2_BITS 0xFC
-  #define NUM_TO_CLEAR_LAST_6_BITS 0x2
-  #define NUM_TO_CLEAR_SECOND_2_BITS 0xF3
-  #define BIT2 2 
-  #define NUM_TO_CLEAR_6TH_BITS 0xBF
-  #define BIT6 6
-  
+#define NUM_TO_CLEAR_FIRST_2_BITS 0xFC
+#define NUM_TO_CLEAR_LAST_6_BITS 0x2
+#define NUM_TO_CLEAR_SECOND_2_BITS 0xF3
+#define NUM_TO_CLEAR_2ND_BIT 0xFD
+#define NUM_TO_CLEAR_LAST_7_BIT 0x01
+#define NUM_TO_CLEAR_3RD_BIT 0xFB
+#define NUM_TO_CLEAR_6TH_BITS 0xBF
+#define BIT2 2
+#define NUM_TO_CLEAR_6TH_BITS 0xBF
+#define BIT6 6
+#define NULL_PTR (void *) 0
+
+
 /* -----------------------------------------------------------------------------
  *                      Functions Prototypes                                   *
   -----------------------------------------------------------------------------*/

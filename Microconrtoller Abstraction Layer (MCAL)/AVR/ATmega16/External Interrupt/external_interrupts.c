@@ -41,7 +41,7 @@ ISR(INT2_vect){
 /* -----------------------------------------------------------------------------
  *                      Functions Definitions                                  *
  ------------------------------------------------------------------------------*/
- 
+
 void INT0_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
 	 * 	n=0: Falling edge generates interrupt
@@ -50,12 +50,13 @@ void INT0_init(const Ei_ConfigType * Config_Ptr){
 	 * 	n=3: Logical change generates interrupt
 	 */
 	MCUCR = (MCUCR & NUM_TO_CLEAR_FIRST_2_BITS) |\
-					(Config_Ptr -> interruptevent & NUM_TO_CLEAR_LAST_6_BITS);
-					
+			(Config_Ptr -> interruptevent & NUM_TO_CLEAR_LAST_6_BITS);
+
 	//Configure INT0 pin as input
 	CLEAR_BIT(DDRD,PD2);
 	//Enable Internal Pull-up
-	PORTD |= (Config_Ptr -> pullup << PD2);
+	PORTD = (PORTD & NUM_TO_CLEAR_2ND_BIT) |\
+			((Config_Ptr -> pullup & NUM_TO_CLEAR_LAST_7_BIT) << PD2);
 	//Module Interrupt Enable
 	SET_BIT(GICR,INT0);
 }
@@ -68,12 +69,13 @@ void INT1_init(const Ei_ConfigType * Config_Ptr){
 	 * 	n=3: Logical change generates interrupt
 	 */
 	MCUCR = (MCUCR & NUM_TO_CLEAR_SECOND_2_BITS) |\
-					((Config_Ptr -> interruptevent & NUM_TO_CLEAR_LAST_6_BITS) << BIT2);
+			((Config_Ptr -> interruptevent & NUM_TO_CLEAR_LAST_6_BITS) << BIT2);
 
 	//Configure INT1 pin as input
 	CLEAR_BIT(DDRD,PD3);
 	//Enable Internal Pull-up
-	PORTD |= (Config_Ptr -> pullup << PD3);
+	PORTD = (PORTD & NUM_TO_CLEAR_3RD_BIT) |\
+			((Config_Ptr -> pullup & NUM_TO_CLEAR_LAST_7_BIT) << PD3);
 	//Module Interrupt Enable
 	SET_BIT(GICR,INT1);
 }
@@ -84,12 +86,13 @@ void INT2_init(const Ei_ConfigType * Config_Ptr){
 	 * 	n=1: Rising edge generates interrupt
 	 */
 	MCUCSR = (MCUCR & NUM_TO_CLEAR_6TH_BITS) |\
-					((((Config_Ptr -> interruptevent)-2) & NUM_TO_CLEAR_LAST_6_BITS) << BIT6);
+			((((Config_Ptr -> interruptevent)-2) & NUM_TO_CLEAR_LAST_6_BITS) << BIT6);
 
 	//Configure INT2 pin as input
 	CLEAR_BIT(DDRB,PB2);
 	//Enable Internal Pull-up
-	PORTB |= (Config_Ptr -> pullup << PB2);
+	PORTB = (PORTB & NUM_TO_CLEAR_2ND_BIT) |\
+			((Config_Ptr -> pullup & NUM_TO_CLEAR_LAST_7_BIT) << PB2);
 	//Module Interrupt Enable
 	SET_BIT(GICR,INT2);
 }
@@ -99,7 +102,7 @@ void INT0_setEvent(const Ei_InterruptEvent a_int0Event){
 	 * insert the required event in MCUCR Register
 	 */
 	MCUCR = (MCUCR & NUM_TO_CLEAR_FIRST_2_BITS) |\
-				(a_int0Event & NUM_TO_CLEAR_LAST_6_BITS);
+			(a_int0Event & NUM_TO_CLEAR_LAST_6_BITS);
 }
 
 void INT1_setEvent(const Ei_InterruptEvent a_int1Event){
@@ -107,7 +110,7 @@ void INT1_setEvent(const Ei_InterruptEvent a_int1Event){
 	 * insert the required event in MCUCR Register
 	 */
 	MCUCR = (MCUCR & NUM_TO_CLEAR_SECOND_2_BITS) |\
-					((a_int1Event & NUM_TO_CLEAR_LAST_6_BITS) << BIT2);
+			((a_int1Event & NUM_TO_CLEAR_LAST_6_BITS) << BIT2);
 }
 
 void INT2_setEvent(const Ei_InterruptEvent a_int2Event){
@@ -115,7 +118,7 @@ void INT2_setEvent(const Ei_InterruptEvent a_int2Event){
 	 * insert the required event in MCUCSR Register
 	 */
 	MCUCSR = (MCUCR & NUM_TO_CLEAR_6TH_BITS) |\
-					((((a_int2Event)-2) & NUM_TO_CLEAR_LAST_6_BITS) << BIT6);
+			((((a_int2Event)-2) & NUM_TO_CLEAR_LAST_6_BITS) << BIT6);
 }
 
 void INT0_setCallBack(void(*a_ptr)(void)){
@@ -140,7 +143,7 @@ void INT0_deInit(void){
 
 void INT1_deInit(void){
 	//Module Interrupt Disable
-	CLEAR_BIT(GICR,INT2);
+	CLEAR_BIT(GICR,INT1);
 }
 
 void INT2_deInit(void){
