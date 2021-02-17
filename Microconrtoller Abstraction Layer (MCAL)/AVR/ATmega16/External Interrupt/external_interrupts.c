@@ -5,15 +5,23 @@
 -------------------------------------------------------------------------------*/
 
 /* Global variables to hold the address of the call back function in the application */
+#ifdef INT0
 static volatile void (*g_callBackPtrInt0)(void) = NULL_PTR;
+#endif
+
+#ifdef INT1
 static volatile void (*g_callBackPtrInt1)(void) = NULL_PTR;
+#endif
+
+#ifdef INT2 
 static volatile void (*g_callBackPtrInt2)(void) = NULL_PTR;
+#endif
 
 
 /* -----------------------------------------------------------------------------
  *                       Interrupt Service Routines                            *
  ------------------------------------------------------------------------------*/
-
+#ifdef INT0
 ISR(INT0_vect){
 	if(g_callBackPtrInt0 != NULL_PTR)
 	{
@@ -21,7 +29,9 @@ ISR(INT0_vect){
 		(*g_callBackPtrInt0)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
+#endif
 
+#ifdef INT1
 ISR(INT1_vect){
 	if(g_callBackPtrInt1 != NULL_PTR)
 	{
@@ -29,7 +39,9 @@ ISR(INT1_vect){
 		(*g_callBackPtrInt1)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
+#endif
 
+#ifdef INT2
 ISR(INT2_vect){
 	if(g_callBackPtrInt2 != NULL_PTR)
 	{
@@ -37,11 +49,13 @@ ISR(INT2_vect){
 		(*g_callBackPtrInt2)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
+#endif
 
 /* -----------------------------------------------------------------------------
  *                      Functions Definitions                                  *
  ------------------------------------------------------------------------------*/
 
+#ifdef INT0
 /* Function to initialize interrupt registers*/
 void INT0_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
@@ -62,6 +76,30 @@ void INT0_init(const Ei_ConfigType * Config_Ptr){
 	SET_BIT(GICR,INT0);
 }
 
+/* Function to select the event at which the interrupt will be triggered*/
+void INT0_setEvent(const Ei_InterruptEvent a_int0Event){
+	/*
+	 * insert the required event in MCUCR Register
+	 */
+	MCUCR = (MCUCR & NUM_TO_CLEAR_FIRST_2_BITS) |\
+			(a_int0Event & NUM_TO_CLEAR_LAST_6_BITS);
+}
+
+/* Function to save the of the call back function in a global variable*/
+void INT0_setCallBack(void(*a_ptr)(void)){
+	/* Save the address of the Call back function in a global variable */
+	g_callBackPtrInt0 = a_ptr;
+}
+
+/* Function to de initializa interrupts registers*/
+void INT0_deInit(void){
+	//Module Interrupt Disable
+	CLEAR_BIT(GICR,INT0);
+}
+#endif
+
+
+#ifdef INT1
 void INT1_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
 	 * Low level generates interrupt
@@ -81,6 +119,27 @@ void INT1_init(const Ei_ConfigType * Config_Ptr){
 	SET_BIT(GICR,INT1);
 }
 
+void INT1_setEvent(const Ei_InterruptEvent a_int1Event){
+	/*
+	 * insert the required event in MCUCR Register
+	 */
+	MCUCR = (MCUCR & NUM_TO_CLEAR_SECOND_2_BITS) |\
+			((a_int1Event & NUM_TO_CLEAR_LAST_6_BITS) << BIT2);
+}
+
+void INT1_setCallBack(void(*a_ptr)(void)){
+	/* Save the address of the Call back function in a global variable */
+	g_callBackPtrInt1 = a_ptr;
+}
+
+void INT1_deInit(void){
+	//Module Interrupt Disable
+	CLEAR_BIT(GICR,INT1);
+}
+#endif
+
+
+#ifdef INT2
 void INT2_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
 	 * Falling edge generates interrupt
@@ -98,23 +157,6 @@ void INT2_init(const Ei_ConfigType * Config_Ptr){
 	SET_BIT(GICR,INT2);
 }
 
-/* Function to select the event at which the interrupt will be triggered*/
-void INT0_setEvent(const Ei_InterruptEvent a_int0Event){
-	/*
-	 * insert the required event in MCUCR Register
-	 */
-	MCUCR = (MCUCR & NUM_TO_CLEAR_FIRST_2_BITS) |\
-			(a_int0Event & NUM_TO_CLEAR_LAST_6_BITS);
-}
-
-void INT1_setEvent(const Ei_InterruptEvent a_int1Event){
-	/*
-	 * insert the required event in MCUCR Register
-	 */
-	MCUCR = (MCUCR & NUM_TO_CLEAR_SECOND_2_BITS) |\
-			((a_int1Event & NUM_TO_CLEAR_LAST_6_BITS) << BIT2);
-}
-
 void INT2_setEvent(const Ei_InterruptEvent a_int2Event){
 	/*
 	 * insert the required event in MCUCSR Register
@@ -123,35 +165,13 @@ void INT2_setEvent(const Ei_InterruptEvent a_int2Event){
 			((((a_int2Event)-2) & NUM_TO_CLEAR_LAST_6_BITS) << BIT6);
 }
 
-/* Function to save the of the call back function in a global variable*/
-void INT0_setCallBack(void(*a_ptr)(void)){
-	/* Save the address of the Call back function in a global variable */
-	g_callBackPtrInt0 = a_ptr;
-}
-
-void INT1_setCallBack(void(*a_ptr)(void)){
-	/* Save the address of the Call back function in a global variable */
-	g_callBackPtrInt1 = a_ptr;
-}
-
 void INT2_setCallBack(void(*a_ptr)(void)){
 	/* Save the address of the Call back function in a global variable */
 	g_callBackPtrInt2 = a_ptr;
-}
-
-/* Function to de initializa interrupts registers*/
-void INT0_deInit(void){
-	//Module Interrupt Disable
-	CLEAR_BIT(GICR,INT0);
-}
-
-void INT1_deInit(void){
-	//Module Interrupt Disable
-	CLEAR_BIT(GICR,INT1);
 }
 
 void INT2_deInit(void){
 	//Module Interrupt Disable
 	CLEAR_BIT(GICR,INT2);
 }
-
+#endif

@@ -38,6 +38,9 @@ typedef struct
 /* -----------------------------------------------------------------------------
  *                           Preprocessor                                      *
   -----------------------------------------------------------------------------*/
+#define INT0
+#define INT1
+#define INT2
 #define NUM_TO_CLEAR_FIRST_2_BITS 0xFC
 #define NUM_TO_CLEAR_LAST_6_BITS 0x2
 #define NUM_TO_CLEAR_SECOND_2_BITS 0xF3
@@ -53,21 +56,30 @@ typedef struct
 /* -----------------------------------------------------------------------------
  *                      Functions Prototypes                                   *
   -----------------------------------------------------------------------------*/
+
+#ifdef INT0
 /* Function to initialize interrupt registers*/
 void INT0_init(const Ei_ConfigType * Config_Ptr);
-void INT1_init(const Ei_ConfigType * Config_Ptr);
-void INT2_init(const Ei_ConfigType * Config_Ptr);
 /* Function to select the event at which the interrupt will be triggered*/
 void INT0_setEvent(const Ei_InterruptEvent a_int0Event);
-void INT1_setEvent(const Ei_InterruptEvent a_int1Event);
-void INT2_setEvent(const Ei_InterruptEvent a_int2Event);
 /* Function to save the of the call back function in a global variable*/
 void INT0_setCallBack(void(*a_ptr)(void));
-void INT1_setCallBack(void(*a_ptr)(void));
-void INT2_setCallBack(void(*a_ptr)(void));
 /* Function to de initializa interrupts registers*/
 void INT0_deInit(void);
+#endif
+
+#ifdef INT1
+void INT1_init(const Ei_ConfigType * Config_Ptr);
+void INT1_setEvent(const Ei_InterruptEvent a_int1Event);
+void INT1_setCallBack(void(*a_ptr)(void));
 void INT1_deInit(void);
+#endif
+
+#ifdef INT2
+void INT2_init(const Ei_ConfigType * Config_Ptr);
+void INT2_setEvent(const Ei_InterruptEvent a_int2Event);
+void INT2_setCallBack(void(*a_ptr)(void));
 void INT2_deInit(void);
+#endif
 
 #endif
