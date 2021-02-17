@@ -10,7 +10,7 @@
 
 #include "adc.h"
 
-#ifdef INTERRUPT_MODE
+#if (MODE == INTERRUPT)
 /* -----------------------------------------------------------------------------
  *                          Global Variables                                   *
 ------------------------------------------------------------------------------*/
@@ -47,16 +47,15 @@ void ADC_init(const Adc_ConfigType * config_Ptr){
 	CLEAR_BIT(ADCSRA,ADATE);
 	CLEAR_BIT(ADCSRA,ADSC);
 
-#ifdef INTERRUPT_MODE
+#if (MODE == INTERRUPT)
 	SET_BIT(ADCSRA,ADIE);
 	#ifdef AUTO_TRIGGER_MODE
 		SET_BIT(ADCSRA,ADATE);
 		SFIOR = (SFIOR & NUM_TO_CLEAR_LAST_3_BITS) |\
 				((config_Ptr -> triggersource & NUM_TO_CLEAR_LAST_5_BITS)<<5);
 	#endif
-#endif
 
-#ifdef POLLING_MODE
+#elif (MODE == POLLING)
 	CLEAR_BIT(ADCSRA,ADIE);
 #endif
 
@@ -65,15 +64,13 @@ void ADC_init(const Adc_ConfigType * config_Ptr){
 
 }
 
-#ifdef INTERRUPT_MODE
+#if (MODE == INTERRUPT)
 void ADC_readChannel(const Adc_ConfigType * config_Ptr){
 	ADMUX = (ADMUX & NUM_TO_CLEAR_FIRST_5_BITS) | \
 			(config_Ptr -> channelnumber & NUM_TO_CLEAR_LAST_5_BITS);
 	SET_BIT(ADCSRA,ADSC);		/* start conversion write '1' to ADSC */
 }
-#endif
-
-#ifdef POLLING_MODE
+#elif (MODE == POLLING)
 uint16 ADC_readChannel(const Adc_ConfigType * config_Ptr){
 	ADMUX = (ADMUX & NUM_TO_CLEAR_FIRST_5_BITS) | \
 			(config_Ptr -> channelnumber & NUM_TO_CLEAR_LAST_5_BITS);

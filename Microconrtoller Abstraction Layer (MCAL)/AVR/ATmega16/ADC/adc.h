@@ -51,7 +51,7 @@ typedef struct
 /* -----------------------------------------------------------------------------
  *                      Preprocessor Macros                                    *
  ------------------------------------------------------------------------------*/
-#define INTERRUPT_MODE
+#define MODE INTERRUPT
 #define NUM_TO_CLEAR_FIRST_3_BITS 0xF8
 #define NUM_TO_CLEAR_LAST_3_BITS 0x1F
 #define NUM_TO_CLEAR_LAST_5_BITS 0x07
