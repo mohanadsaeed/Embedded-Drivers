@@ -60,6 +60,10 @@ void TIMER0_initOvfMode(const Timer0_ConfigTypeOvf * Config_Ptr){
 		/*Set OC0 pin as output*/
 		SET_BIT(DDRB,PB3);
 	}
+	else if(Config_Ptr -> oc0Mode == OC0_TOGGLE) {
+		CLEAR_BIT(TIMSK,OCIE0);
+	}
+
 	SET_BIT(TCCR0,FOC0);
 	/*Normal Mode (Overflow Mode)*/
 	CLEAR_BIT(TCCR0,WGM01);
