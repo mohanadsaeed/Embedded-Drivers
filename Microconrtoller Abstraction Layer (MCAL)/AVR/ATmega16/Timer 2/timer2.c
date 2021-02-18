@@ -13,18 +13,12 @@
 /* -----------------------------------------------------------------------------
  *                           Global Variables                                  *
 -------------------------------------------------------------------------------*/
-#ifdef OVF_MODE
 static volatile void (*g_callBackPtrOvf)(void) = NULL_PTR;
-#endif
-
-#ifdef COMP_MODE
 static volatile void (*g_callBackPtrComp)(void) = NULL_PTR;
-#endif
 
 /* -----------------------------------------------------------------------------
  *                       Interrupt Service Routines                            *
  ------------------------------------------------------------------------------*/
-#ifdef OVF_MODE
 ISR(TIMER2_OVF_vect){
 	if(g_callBackPtrOvf != NULL_PTR)
 	{
@@ -32,9 +26,7 @@ ISR(TIMER2_OVF_vect){
 		(*g_callBackPtrOvf)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
-#endif
 
-#ifdef COMP_MODE
 ISR(TIMER2_COMP_vect){
 	if(g_callBackPtrComp != NULL_PTR)
 	{
@@ -42,109 +34,82 @@ ISR(TIMER2_COMP_vect){
 		(*g_callBackPtrComp)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
-#endif
 
 /* -----------------------------------------------------------------------------
  *                      Functions Definitions                                  *
  ------------------------------------------------------------------------------*/
-#ifdef OVF_MODE
-void TIMER2_initOvfMode(const Timer2_ConfigTypeOvf * Config_Ptr){
-	/*Initial value for timer 2*/
+void TIMER2_init(const Timer2_ConfigType * Config_Ptr){
+	/*Initial value for timer 0*/
 	TCNT2 = Config_Ptr -> initialValue;
-	/*Overflow Interrupt Enable*/
-	SET_BIT(TIMSK,TOIE2);
-	/*Compare Interrupt Disable*/
-	CLEAR_BIT(TIMSK,OCIE2);
 	/*Timer 2 is clocked from the MC clock*/
 	CLEAR_BIT(ASSR,AS2);
-
-	if(Config_Ptr -> oc2Mode != OC2_DISCONNECT){
-		/*Set OC2 pin as output*/
-		SET_BIT(DDRD,PD7);
-	}
-	SET_BIT(TCCR2,FOC2);
-	/*Normal Mode (Overflow Mode)*/
-	CLEAR_BIT(TCCR2,WGM21);
-	CLEAR_BIT(TCCR2,WGM20);
-	/*OC2 Mode Selection*/
-	TCCR2 = (TCCR2 & NUM_TO_CLEAR_4_5TH_BITS) |\
-			((Config_Ptr -> oc2Mode & NUM_TO_CLEAR_LAST_6_BITS) << BIT4);
-	/*Initialize Clock*/
-	TCCR2 = (TCCR2 & NUM_TO_CLEAR_FIRST_3_BITS) |\
-			(Config_Ptr -> clock & NUM_TO_CLEAR_LAST_5_BITS);	
-}
-
-void TIMER2_setCallBackOvf(void(*a_ptr)(void)){
-	/* Save the address of the Call back function in a global variable */
-	g_callBackPtrOvf = a_ptr;
-}
-#endif
-
-#ifdef COMP_MODE
-void TIMER2_initCompMode(const Timer2_ConfigTypeComp * Config_Ptr){
-	/*Initial value for timer 2*/
-	TCNT2=0;
-	/*Compare Value*/
-	OCR2 = Config_Ptr -> tick;
-	/*Compare Interrupt Enable*/
-	SET_BIT(TIMSK,OCIE2);
-	/*Overflow Interrupt Disable*/
-	CLEAR_BIT(TIMSK,TOIE2);
-	/*Timer 2 is clocked from the MC clock*/
-	CLEAR_BIT(ASSR,AS2);
-
-	if(Config_Ptr -> oc2Mode != OC2_DISCONNECT){
-		/*Set OC2 pin as output*/
-		SET_BIT(DDRD,PD7);
-	}
-	else if(Config_Ptr -> oc2Mode == OC2_TOGGLE) {
+	switch (Config_Ptr -> mode){
+	case TIMER2_OVF:
+		/*Overflow Interrupt Enable*/
+		SET_BIT(TIMSK,TOIE2);
+		/*Compare Interrupt Disable*/
 		CLEAR_BIT(TIMSK,OCIE2);
+		/*Enable Force Compare Mode*/
+		SET_BIT(TCCR2,FOC2);
+		break;
+	case TIMER2_CTC:
+		/*Initial value for timer 2*/
+		TCNT2=0;
+		/*Compare Interrupt Enable*/
+		SET_BIT(TIMSK,OCIE2);
+		/*Overflow Interrupt Disable*/
+		CLEAR_BIT(TIMSK,TOIE2);
+		/*Enable Force Compare Mode*/
+		SET_BIT(TCCR2,FOC2);
+		/*Compare Value*/
+		OCR2 = Config_Ptr -> tick;
+		break;
+
+	case TIMER2_FAST_PWM:
+		/*Disable all Interrupts*/
+		CLEAR_BIT(TIMSK,OCIE2);
+		CLEAR_BIT(TIMSK,TOIE2);
+		/*Disable Force Compare Mode*/
+		CLEAR_BIT(TCCR2,FOC2);
+		OCR2 = Config_Ptr -> dutyCycle;
+
 	}
-	SET_BIT(TCCR2,FOC2);
-	/*Compare Mode (CTC)*/
-	SET_BIT(TCCR2,WGM21);
-	CLEAR_BIT(TCCR2,WGM20);
-	/*OC2 Mode Selection*/
-	TCCR2 = (TCCR2 & NUM_TO_CLEAR_4_5TH_BITS) |\
-			((Config_Ptr -> oc2Mode & NUM_TO_CLEAR_LAST_6_BITS) << BIT4);
+
+	/*Select Mode of Operation*/
+	/*Insert first bit of mode into WGM02 Bit*/
+	TCCR2 = (TCCR2 & NUM_TO_CLEAR_6TH_BIT) |\
+			((Config_Ptr -> mode & NUM_TO_CLEAR_LAST_7_BITS)<<BIT6);
+	/*Insert second bit of mode into WGM12 Bit*/
+	TCCR2 = (TCCR2 & NUM_TO_CLEAR_3TH_BIT) |\
+			((Config_Ptr -> mode & NUM_TO_CLEAR_FIRST_BIT_LAST_6_BITS)<<BIT2);
+
+	/*Select OC2 Mode*/
+	TCCR2 = (TCCR2 & NUM_TO_CLEAR_4_5TH_BITS)|\
+			((Config_Ptr -> oc2Mode & NUM_TO_CLEAR_LAST_6_BITS)<<BIT4);
+
 	/*Initialize Clock*/
 	TCCR2 = (TCCR2 & NUM_TO_CLEAR_FIRST_3_BITS) |\
 			(Config_Ptr -> clock & NUM_TO_CLEAR_LAST_5_BITS);
+
+	if(Config_Ptr -> oc2Mode != OC2_DISCONNECT){
+		/*Set OC2 pin as output*/
+		CLEAR_BIT(TIMSK,OCIE2);
+		/*Set OC2 pin as output*/
+		SET_BIT(DDRD,PD7);
+
+	}
 }
 
-void TIMER2_setCallBackComp(void(*a_ptr)(void)){
+void TIMER2_setCallBack(void(*a_ptr)(void),Timer2_ModeOfOperation mode){
 	/* Save the address of the Call back function in a global variable */
-	g_callBackPtrComp = a_ptr;
+	switch (mode){
+	case TIMER2_OVF:
+		g_callBackPtrOvf = a_ptr;
+		break;
+	case TIMER2_CTC:
+		g_callBackPtrComp = a_ptr;
+	}
 }
-#endif
-
-#ifdef FAST_PWM_MODE
-void TIMER2_initPwmMode(const Timer2_ConfigTypePwm * Config_Ptr){
-	TCNT2 = Config_Ptr -> initialValue; // Set Timer Initial Value to 0
-	/*Timer 2 is clocked from the MC clock*/
-	CLEAR_BIT(ASSR,AS2);
-
-	/* configure the timer
-	 * 1. Fast PWM mode FOC2=0
-	 * 2. Fast PWM Mode WGM21=1 & WGM20=1
-	 * 3. Clear OC2 when match occurs (non inverted mode) COM20=0 & COM21=1
-	 * 4. clock 
-	 */ 
-	CLEAR_BIT(TCCR2,FOC2);
-	SET_BIT(TCCR2,WGM20);
-	SET_BIT(TCCR2,WGM21);	
-	/*OC2 Mode Selection (Inverting / Non-inverting)*/
-	TCCR2 = (TCCR2 & NUM_TO_CLEAR_4_5TH_BITS) |\
-			((Config_Ptr -> oc2Mode & NUM_TO_CLEAR_LAST_6_BITS) << BIT4);
-	/*Initialize Clock*/
-	TCCR2 = (TCCR2 & NUM_TO_CLEAR_FIRST_3_BITS) |\
-			(Config_Ptr -> clock & NUM_TO_CLEAR_LAST_5_BITS);		
-	OCR2  = Config_Ptr -> dutyCycle; 
-
-	/*set PD7/OC2 as output pin --> pin where the PWM signal is generated from MC.*/
-	SET_BIT(DDRD,PD7);
-}
-#endif
 
 void TIMER2_deInit(void){
 	TCCR2=0;
@@ -159,4 +124,8 @@ void TIMER2_startCount(const Timer2_Clock a_clock){
 
 void TIMER2_stopCount(void){
 	TCCR2 &= NUM_TO_CLEAR_FIRST_3_BITS;
+}
+
+void TIMER2_changeDutyCycle(uint8 duty){
+	OCR2 = duty;
 }
