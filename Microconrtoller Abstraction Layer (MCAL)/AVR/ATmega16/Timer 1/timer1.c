@@ -52,7 +52,7 @@ void TIMER1_init(const Timer1_ConfigType * Config_Ptr){
 	/*Initial value for timer 1*/
 	TCNT1 = Config_Ptr -> initialValue;
 	switch (Config_Ptr -> mode){
-	case OVF:
+	case TIMER1_OVF:
 		/*Overflow Interrupt Enable*/
 		SET_BIT(TIMSK,TOIE1);
 		/*Disable Other Modes Interrupts*/
@@ -63,7 +63,7 @@ void TIMER1_init(const Timer1_ConfigType * Config_Ptr){
 		SET_BIT(TCCR1A,FOC1B);
 		break;
 
-	case CTC:
+	case TIMER1_CTC:
 		/*Compare Interrupt Enable*/
 		SET_BIT(TIMSK,OCIE1A);
 		/*Disable Other Modes Interrupts*/
@@ -76,7 +76,7 @@ void TIMER1_init(const Timer1_ConfigType * Config_Ptr){
 		OCR1A = Config_Ptr -> tick;
 		break;
 
-	case FAST_PWM_OCR1A:
+	case TIMER1_FAST_PWM_OCR1A:
 		/*Disable All Interrupts*/
 		CLEAR_BIT(TIMSK,OCIE1A);
 		CLEAR_BIT(TIMSK,OCIE1B);
@@ -90,7 +90,7 @@ void TIMER1_init(const Timer1_ConfigType * Config_Ptr){
 		OCR1B = Config_Ptr -> dutyCycleB;
 		break;
 
-	case FAST_PWM_ICR1:
+	case TIMER1_FAST_PWM_ICR1:
 		/*Disable All Interrupts*/
 		CLEAR_BIT(TIMSK,OCIE1A);
 		CLEAR_BIT(TIMSK,OCIE1B);
@@ -150,10 +150,10 @@ void TIMER1_init(const Timer1_ConfigType * Config_Ptr){
 void TIMER1_setCallBack(void(*a_ptr)(void),const Timer1_ModeOfOperation mode){
 	/* Save the address of the Call back function in a global variable */
 	switch (mode){
-	case OVF:
+	case TIMER1_OVF:
 		g_callBackPtrOvf = a_ptr;
 		break;
-	case CTC:
+	case TIMER1_CTC:
 		g_callBackPtrCompA = a_ptr;
 		break;
 	}

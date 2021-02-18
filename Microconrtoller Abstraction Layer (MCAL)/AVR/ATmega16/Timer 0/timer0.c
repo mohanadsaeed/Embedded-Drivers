@@ -42,7 +42,7 @@ void TIMER0_init(const Timer0_ConfigType * Config_Ptr){
 	/*Initial value for timer 0*/
 	TCNT0 = Config_Ptr -> initialValue;
 	switch (Config_Ptr -> mode){
-	case OVF:
+	case TIMER0_OVF:
 		/*Overflow Interrupt Enable*/
 		SET_BIT(TIMSK,TOIE0);
 		/*Compare Interrupt Disable*/
@@ -50,7 +50,7 @@ void TIMER0_init(const Timer0_ConfigType * Config_Ptr){
 		/*Enable Force Compare Mode*/
 		SET_BIT(TCCR0,FOC0);
 		break;
-	case CTC:
+	case TIMER0_CTC:
 		/*Initial value for timer 0*/
 		TCNT0=0;
 		/*Compare Interrupt Enable*/
@@ -63,7 +63,7 @@ void TIMER0_init(const Timer0_ConfigType * Config_Ptr){
 		OCR0 = Config_Ptr -> tick;
 		break;
 
-	case FAST_PWM:
+	case TIMER0_FAST_PWM:
 		/*Disable all Interrupts*/
 		CLEAR_BIT(TIMSK,OCIE0);
 		CLEAR_BIT(TIMSK,TOIE0);
@@ -100,10 +100,10 @@ void TIMER0_init(const Timer0_ConfigType * Config_Ptr){
 void TIMER0_setCallBack(void(*a_ptr)(void),Timer0_ModeOfOperation mode){
 	/* Save the address of the Call back function in a global variable */
 	switch (mode){
-	case OVF:
+	case TIMER0_OVF:
 		g_callBackPtrOvf = a_ptr;
 		break;
-	case CTC:
+	case TIMER0_CTC:
 		g_callBackPtrComp = a_ptr;
 	}
 }
