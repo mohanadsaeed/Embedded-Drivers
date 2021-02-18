@@ -13,18 +13,12 @@
 /* -----------------------------------------------------------------------------
  *                           Global Variables                                  *
 -------------------------------------------------------------------------------*/
-#ifdef OVF_MODE
 static volatile void (*g_callBackPtrOvf)(void) = NULL_PTR;
-#endif
-
-#ifdef COMP_MODE
 static volatile void (*g_callBackPtrComp)(void) = NULL_PTR;
-#endif
 
 /* -----------------------------------------------------------------------------
  *                       Interrupt Service Routines                            *
  ------------------------------------------------------------------------------*/
-#ifdef OVF_MODE
 ISR(TIMER0_OVF_vect){
 	if(g_callBackPtrOvf != NULL_PTR)
 	{
@@ -32,9 +26,7 @@ ISR(TIMER0_OVF_vect){
 		(*g_callBackPtrOvf)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
-#endif
 
-#ifdef COMP_MODE
 ISR(TIMER0_COMP_vect){
 	if(g_callBackPtrComp != NULL_PTR)
 	{
@@ -42,107 +34,79 @@ ISR(TIMER0_COMP_vect){
 		(*g_callBackPtrComp)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
-#endif
 
 /* -----------------------------------------------------------------------------
  *                      Functions Definitions                                  *
  ------------------------------------------------------------------------------*/
-#ifdef OVF_MODE
-void TIMER0_initOvfMode(const Timer0_ConfigTypeOvf * Config_Ptr){
+void TIMER0_init(const Timer0_ConfigType * Config_Ptr){
 	/*Initial value for timer 0*/
 	TCNT0 = Config_Ptr -> initialValue;
-	/*Overflow Interrupt Enable*/
-	SET_BIT(TIMSK,TOIE0);
-	/*Compare Interrupt Disable*/
-	CLEAR_BIT(TIMSK,OCIE0);
-
-	if(Config_Ptr -> oc0Mode != OC0_DISCONNECT){
-		/*Set OC0 pin as output*/
-		SET_BIT(DDRB,PB3);
-	}
-	else if(Config_Ptr -> oc0Mode == OC0_TOGGLE) {
+	switch (Config_Ptr -> mode){
+	case OVF:
+		/*Overflow Interrupt Enable*/
+		SET_BIT(TIMSK,TOIE0);
+		/*Compare Interrupt Disable*/
 		CLEAR_BIT(TIMSK,OCIE0);
-	}
+		/*Enable Force Compare Mode*/
+		SET_BIT(TCCR0,FOC0);
+		break;
+	case CTC:
+		/*Initial value for timer 0*/
+		TCNT0=0;
+		/*Compare Interrupt Enable*/
+		SET_BIT(TIMSK,OCIE0);
+		/*Overflow Interrupt Disable*/
+		CLEAR_BIT(TIMSK,TOIE0);
+		/*Enable Force Compare Mode*/
+		SET_BIT(TCCR0,FOC0);
+		/*Compare Value*/
+		OCR0 = Config_Ptr -> tick;
+		break;
 
-	SET_BIT(TCCR0,FOC0);
-	/*Normal Mode (Overflow Mode)*/
-	CLEAR_BIT(TCCR0,WGM01);
-	CLEAR_BIT(TCCR0,WGM00);
-	/*OC0 Mode Selection*/
-	TCCR0 = (TCCR0 & NUM_TO_CLEAR_4_5TH_BITS) |\
-			((Config_Ptr -> oc0Mode & NUM_TO_CLEAR_LAST_6_BITS) << BIT4);
-	/*Initialize Clock*/
-	TCCR0 = (TCCR0 & NUM_TO_CLEAR_FIRST_3_BITS) |\
-			(Config_Ptr -> clock & NUM_TO_CLEAR_LAST_5_BITS);	
-}
-
-void TIMER0_setCallBackOvf(void(*a_ptr)(void)){
-	/* Save the address of the Call back function in a global variable */
-	g_callBackPtrOvf = a_ptr;
-}
-#endif
-
-#ifdef COMP_MODE
-void TIMER0_initCompMode(const Timer0_ConfigTypeComp * Config_Ptr){
-	/*Initial value for timer 0*/
-	TCNT0=0;
-	/*Compare Value*/
-	OCR0 = Config_Ptr -> tick;
-	/*Compare Interrupt Enable*/
-	SET_BIT(TIMSK,OCIE0);
-	/*Overflow Interrupt Disable*/
-	CLEAR_BIT(TIMSK,TOIE0);
-
-	if(Config_Ptr -> oc0Mode != OC0_DISCONNECT){
-		/*Set OC0 pin as output*/
-		SET_BIT(DDRB,PB3);
-	}
-	else if(Config_Ptr -> oc0Mode == OC0_TOGGLE) {
+	case FAST_PWM:
+		/*Disable all Interrupts*/
 		CLEAR_BIT(TIMSK,OCIE0);
+		CLEAR_BIT(TIMSK,TOIE0);
+		/*Disable Force Compare Mode*/
+		CLEAR_BIT(TCCR0,FOC0);
+		OCR0 = Config_Ptr -> dutyCycle;
+
 	}
-	SET_BIT(TCCR0,FOC0);
-	/*Compare Mode (CTC)*/
-	SET_BIT(TCCR0,WGM01);
-	CLEAR_BIT(TCCR0,WGM00);
-	/*OC0 Mode Selection*/
-	TCCR0 = (TCCR0 & NUM_TO_CLEAR_4_5TH_BITS) |\
-			((Config_Ptr -> oc0Mode & NUM_TO_CLEAR_LAST_6_BITS) << BIT4);
+
+	/*Select Mode of Operation*/
+	/*Insert first bit of mode into WGM00 Bit*/
+	TCCR0 = (TCCR0 & NUM_TO_CLEAR_6TH_BIT) |\
+			((Config_Ptr -> mode & NUM_TO_CLEAR_LAST_7_BITS)<<BIT6);
+	/*Insert second bit of mode into WGM10 Bit*/
+	TCCR0 = (TCCR0 & NUM_TO_CLEAR_3TH_BIT) |\
+			((Config_Ptr -> mode & NUM_TO_CLEAR_FIRST_BIT_LAST_6_BITS)<<BIT2);
+
+	/*Select OC0 Mode*/
+	TCCR0 = (TCCR0 & NUM_TO_CLEAR_4_5TH_BITS)|\
+			((Config_Ptr -> oc0Mode & NUM_TO_CLEAR_LAST_6_BITS)<<BIT4);
+
 	/*Initialize Clock*/
 	TCCR0 = (TCCR0 & NUM_TO_CLEAR_FIRST_3_BITS) |\
 			(Config_Ptr -> clock & NUM_TO_CLEAR_LAST_5_BITS);
+
+	if(Config_Ptr -> oc0Mode != OC0_DISCONNECT){
+		/*Set OC0 pin as output*/
+		CLEAR_BIT(TIMSK,OCIE0);
+		/*Set OC0 as output pin*/
+		SET_BIT(DDRB,PB3);
+	}
 }
 
-void TIMER0_setCallBackComp(void(*a_ptr)(void)){
+void TIMER0_setCallBack(void(*a_ptr)(void),Timer0_ModeOfOperation mode){
 	/* Save the address of the Call back function in a global variable */
-	g_callBackPtrComp = a_ptr;
+	switch (mode){
+	case OVF:
+		g_callBackPtrOvf = a_ptr;
+		break;
+	case CTC:
+		g_callBackPtrComp = a_ptr;
+	}
 }
-#endif
-
-#ifdef FAST_PWM_MODE
-void TIMER0_initPwmMode(const Timer0_ConfigTypePwm * Config_Ptr){
-	TCNT0 = Config_Ptr -> initialValue; // Set Timer Initial Value to 0
-
-	/* configure the timer
-	 * 1. Fast PWM mode FOC0=0
-	 * 2. Fast PWM Mode WGM01=1 & WGM00=1
-	 * 3. Clear OC0 when match occurs (non inverted mode) COM00=0 & COM01=1
-	 * 4. clock 
-	 */ 
-	CLEAR_BIT(TCCR0,FOC0);
-	SET_BIT(TCCR0,WGM00);
-	SET_BIT(TCCR0,WGM01);	
-	/*OC0 Mode Selection (Inverting / Non-inverting)*/
-	TCCR0 = (TCCR0 & NUM_TO_CLEAR_4_5TH_BITS) |\
-			((Config_Ptr -> oc0Mode & NUM_TO_CLEAR_LAST_6_BITS) << BIT4);
-	/*Initialize Clock*/
-	TCCR0 = (TCCR0 & NUM_TO_CLEAR_FIRST_3_BITS) |\
-			(Config_Ptr -> clock & NUM_TO_CLEAR_LAST_5_BITS);		
-	OCR0  = Config_Ptr -> dutyCycle; 
-
-	/*set PB3/OC0 as output pin --> pin where the PWM signal is generated from MC.*/
-	SET_BIT(DDRB,PB3);
-}
-#endif
 
 void TIMER0_deInit(void){
 	TCCR0=0;
@@ -157,4 +121,8 @@ void TIMER0_startCount(const Timer0_Clock a_clock){
 
 void TIMER0_stopCount(void){
 	TCCR0 &= NUM_TO_CLEAR_FIRST_3_BITS;
+}
+
+void TIMER0_changeDutyCycle(uint8 duty){
+	OCR0 = duty;
 }
