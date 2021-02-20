@@ -162,8 +162,14 @@ void LCD_displayStringRowColumn(uint8 row,uint8 col,const char *Str)
 
 void LCD_intgerToString(int data)
 {
+	uint8 i=0;
    char buff[16]; /* String to hold the ascii result */
    itoa(data,buff,10); /* 10 for decimal */
+   while(buff[i]!='\0'){
+	   i++;
+   }
+   buff[i]=' ';
+   buff[i+1]='\0';
    LCD_displayString(buff);
 }
 

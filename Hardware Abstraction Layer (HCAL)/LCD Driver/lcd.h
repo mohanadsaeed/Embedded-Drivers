@@ -19,7 +19,7 @@
  *                      Preprocessor Macros                                    *
 ------------------------------------------------------------------------------*/
 /* LCD Data bits mode configuration */
-#define DATA_BITS_MODE 4
+#define DATA_BITS_MODE 8
 
 /* Use higher 4 bits in the data port */
 #if (DATA_BITS_MODE == 4)
@@ -27,9 +27,9 @@
 #endif
 
 /* LCD HW Pins */
-#define RS PD4
-#define RW PD5
-#define E  PD6
+#define RS PD0
+#define RW PD1
+#define E  PD2
 #define LCD_CTRL_PORT PORTD
 #define LCD_CTRL_PORT_DIR DDRD
 
