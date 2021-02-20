@@ -5,15 +5,15 @@
 -------------------------------------------------------------------------------*/
 
 /* Global variables to hold the address of the call back function in the application */
-#ifdef INT0
+#ifdef INTERRUPT0
 static volatile void (*g_callBackPtrInt0)(void) = NULL_PTR;
 #endif
 
-#ifdef INT1
+#ifdef INTERRUPT1
 static volatile void (*g_callBackPtrInt1)(void) = NULL_PTR;
 #endif
 
-#ifdef INT2 
+#ifdef INTERRUPT2
 static volatile void (*g_callBackPtrInt2)(void) = NULL_PTR;
 #endif
 
@@ -21,7 +21,7 @@ static volatile void (*g_callBackPtrInt2)(void) = NULL_PTR;
 /* -----------------------------------------------------------------------------
  *                       Interrupt Service Routines                            *
  ------------------------------------------------------------------------------*/
-#ifdef INT0
+#ifdef INTERRUPT0
 ISR(INT0_vect){
 	if(g_callBackPtrInt0 != NULL_PTR)
 	{
@@ -31,7 +31,7 @@ ISR(INT0_vect){
 }
 #endif
 
-#ifdef INT1
+#ifdef INTERRUPT1
 ISR(INT1_vect){
 	if(g_callBackPtrInt1 != NULL_PTR)
 	{
@@ -41,7 +41,7 @@ ISR(INT1_vect){
 }
 #endif
 
-#ifdef INT2
+#ifdef INTERRUPT2
 ISR(INT2_vect){
 	if(g_callBackPtrInt2 != NULL_PTR)
 	{
@@ -55,7 +55,7 @@ ISR(INT2_vect){
  *                      Functions Definitions                                  *
  ------------------------------------------------------------------------------*/
 
-#ifdef INT0
+#ifdef INTERRUPT0
 /* Function to initialize interrupt registers*/
 void INT0_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
@@ -99,7 +99,7 @@ void INT0_deInit(void){
 #endif
 
 
-#ifdef INT1
+#ifdef INTERRUPT1
 void INT1_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
 	 * Low level generates interrupt
@@ -139,7 +139,7 @@ void INT1_deInit(void){
 #endif
 
 
-#ifdef INT2
+#ifdef INTERRUPT2
 void INT2_init(const Ei_ConfigType * Config_Ptr){
 	/*Select when the interrupt occurs
 	 * Falling edge generates interrupt
