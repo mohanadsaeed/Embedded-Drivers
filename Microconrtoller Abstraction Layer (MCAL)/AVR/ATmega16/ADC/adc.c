@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
-[FILE NAME]    :	adc.h
+[FILE NAME]    :	adc.c
 
 [AUTHOR]       :	MOHANAD K. SAEED
 
@@ -10,7 +10,7 @@
 
 #include "adc.h"
 
-#if (MODE == INTERRUPT)
+#ifdef INTERRUPT_MODE
 /* -----------------------------------------------------------------------------
  *                          Global Variables                                   *
 ------------------------------------------------------------------------------*/
@@ -47,15 +47,16 @@ void ADC_init(const Adc_ConfigType * config_Ptr){
 	CLEAR_BIT(ADCSRA,ADATE);
 	CLEAR_BIT(ADCSRA,ADSC);
 
-#if (MODE == INTERRUPT)
+#ifdef INTERRUPT_MODE
 	SET_BIT(ADCSRA,ADIE);
 	#ifdef AUTO_TRIGGER_MODE
 		SET_BIT(ADCSRA,ADATE);
 		SFIOR = (SFIOR & NUM_TO_CLEAR_LAST_3_BITS) |\
 				((config_Ptr -> triggersource & NUM_TO_CLEAR_LAST_5_BITS)<<5);
 	#endif
+#endif
 
-#elif (MODE == POLLING)
+#ifdef POLLING_MODE
 	CLEAR_BIT(ADCSRA,ADIE);
 #endif
 
@@ -64,16 +65,18 @@ void ADC_init(const Adc_ConfigType * config_Ptr){
 
 }
 
-#if (MODE == INTERRUPT)
-void ADC_readChannel(const Adc_ConfigType * config_Ptr){
+#ifdef INTERRUPT_MODE
+void ADC_readChannel(const Adc_ChannelNumber channel){
 	ADMUX = (ADMUX & NUM_TO_CLEAR_FIRST_5_BITS) | \
-			(config_Ptr -> channelnumber & NUM_TO_CLEAR_LAST_5_BITS);
+			(channel & NUM_TO_CLEAR_LAST_5_BITS);
 	SET_BIT(ADCSRA,ADSC);		/* start conversion write '1' to ADSC */
 }
-#elif (MODE == POLLING)
-uint16 ADC_readChannel(const Adc_ConfigType * config_Ptr){
+#endif
+
+#ifdef POLLING_MODE
+uint16 ADC_readChannel(Adc_ChannelNumber channel){
 	ADMUX = (ADMUX & NUM_TO_CLEAR_FIRST_5_BITS) | \
-			(config_Ptr -> channelnumber & NUM_TO_CLEAR_LAST_5_BITS);
+			(channel & NUM_TO_CLEAR_LAST_5_BITS);
 	SET_BIT(ADCSRA,ADSC);		/* start conversion write '1' to ADSC */
 	while(BIT_IS_CLEAR(ADCSRA,ADIF)); /* wait for conversion to complete ADIF becomes '1' */
 	SET_BIT(ADCSRA,ADIF); /* clear ADIF by write '1' to it :) */

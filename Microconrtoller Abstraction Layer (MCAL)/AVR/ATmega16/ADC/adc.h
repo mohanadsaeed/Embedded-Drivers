@@ -23,7 +23,8 @@
  ------------------------------------------------------------------------------*/
 typedef enum
 {
-	F_CPU_1,F_CPU_2,F_CPU_4,F_CPU_8,F_CPU_16,F_CPU_32,F_CPU_64,F_CPU_128
+	ADC_F_CPU_1,ADC_F_CPU_2,ADC_F_CPU_4,ADC_F_CPU_8,ADC_F_CPU_16,ADC_F_CPU_32,\
+	ADC_F_CPU_64,ADC_F_CPU_128
 }Adc_Clock;
 
 typedef enum
@@ -51,7 +52,7 @@ typedef struct
 /* -----------------------------------------------------------------------------
  *                      Preprocessor Macros                                    *
  ------------------------------------------------------------------------------*/
-#define MODE INTERRUPT
+#define INTERRUPT_MODE
 #define NUM_TO_CLEAR_FIRST_3_BITS 0xF8
 #define NUM_TO_CLEAR_LAST_3_BITS 0x1F
 #define NUM_TO_CLEAR_LAST_5_BITS 0x07
@@ -63,10 +64,10 @@ typedef struct
 ------------------------------------------------------------------------------*/
 void ADC_init(const Adc_ConfigType * config_Ptr);
 #ifdef INTERRUPT_MODE
-void ADC_readChannel(const Adc_ConfigType * config_Ptr);
+void ADC_readChannel(Adc_ChannelNumber channel);
 #endif
 #ifdef POLLING_MODE
-uint16 ADC_readChannel(const Adc_ConfigType * config_Ptr);
+uint16 ADC_readChannel(Adc_ChannelNumber channel);
 #endif
 
 
