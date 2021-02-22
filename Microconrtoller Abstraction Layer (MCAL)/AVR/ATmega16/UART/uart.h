@@ -20,7 +20,7 @@
  ------------------------------------------------------------------------------*/
 
 typedef enum{
-	UART_5_BIT,UART_6_BIT,UART_7_BIT,UART_8_BIT,UART_9_BIT=7
+	UART_5_BIT,UART_6_BIT,UART_7_BIT,UART_8_BIT
 }Uart_DataBits;
 
 typedef enum{
@@ -42,9 +42,6 @@ typedef struct{
  *                      Preprocessor Macros                                    *
  ------------------------------------------------------------------------------*/
 #define INTERRUPT_MODE
-#define DATA
-#define STRING_SIZE 20
-/* UART Driver Baud Rate */
 #define NUM_TO_CLEAR_2ND_BIT 0xFB
 #define NUM_TO_CLEAR_FIRST_2_BITS_LAST_5_BITS 0x04
 #define NUM_TO_CLEAR_1ST_2ND_BITS 0xF9

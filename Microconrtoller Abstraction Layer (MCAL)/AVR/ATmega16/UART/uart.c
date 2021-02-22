@@ -14,31 +14,13 @@
 /* ----------------------------------------------------------------------------
  *                          Global Variables                                  *
 ------------------------------------------------------------------------------*/
-#ifdef DATA
-volatile uint8  g_receivedData;
-#endif
-#ifdef STRING
-volatile uint8 g_receivedString[STRING_SIZE];
-#endif
+volatile uint8  g_uartReceivedData;
 
 /* ----------------------------------------------------------------------------
  *                          ISR's Definitions                                 *
 	------------------------------------------------------------------------------*/
 ISR(USART_RXC_vect){
-#ifdef DATA
-	g_receivedData = UDR;
-#endif
-#ifdef STRING
-	uint8 i = 0;
-	g_receivedString[i] = UDR;
-	while(g_receivedString[i] != '#')
-	{
-		i++;
-		while(BIT_IS_CLEAR(UCSRA,RXC)){}
-		g_receivedString[i] = UDR;
-	}
-	g_receivedString[i] = '\0';
-#endif
+	g_uartReceivedData = UDR;
 }
 #endif
 
