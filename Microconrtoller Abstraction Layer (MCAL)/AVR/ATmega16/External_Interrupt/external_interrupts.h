@@ -56,9 +56,6 @@ typedef struct
   -----------------------------------------------------------------------------*/
 
 #ifdef INTERRUPT0
-#ifdef INTERRUPT1
-#ifdef INTERRUPT2
-
 /* Function to initialize interrupt registers*/
 void INT0_init(const Ei_ConfigType * Config_Ptr);
 /* Function to select the event at which the interrupt will be triggered*/
