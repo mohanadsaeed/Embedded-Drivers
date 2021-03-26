@@ -110,7 +110,7 @@ void TIMER1_init(const Timer1_ConfigType * Config_Ptr){
 		CLEAR_BIT(TIMSK,OCIE1A);
 		CLEAR_BIT(TIMSK,OCIE1B);
 		CLEAR_BIT(TIMSK,TOIE1);
-		/*DisableForce Output Compare*/
+		/*Disable Force Output Compare*/
 		CLEAR_BIT(TCCR1A,FOC1A);
 		CLEAR_BIT(TCCR1A,FOC1B);
 		/*Set Compare Value*/

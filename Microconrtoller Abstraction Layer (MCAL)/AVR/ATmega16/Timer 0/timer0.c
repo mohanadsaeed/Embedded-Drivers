@@ -13,25 +13,24 @@
 /* -----------------------------------------------------------------------------
  *                           Global Variables                                  *
 -------------------------------------------------------------------------------*/
-static volatile void (*g_callBackPtrOvf)(void) = NULL_PTR;
-static volatile void (*g_callBackPtrComp)(void) = NULL_PTR;
+static volatile void (*g_callBackPtr)(void) = NULL_PTR;
 
 /* -----------------------------------------------------------------------------
  *                       Interrupt Service Routines                            *
  ------------------------------------------------------------------------------*/
 ISR(TIMER0_OVF_vect){
-	if(g_callBackPtrOvf != NULL_PTR)
+	if(g_callBackPtr != NULL_PTR)
 	{
 		/* Call the Call Back function in the application after the edge is detected */
-		(*g_callBackPtrOvf)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+		(*g_callBackPtr)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
 
 ISR(TIMER0_COMP_vect){
-	if(g_callBackPtrComp != NULL_PTR)
+	if(g_callBackPtr != NULL_PTR)
 	{
 		/* Call the Call Back function in the application after the edge is detected */
-		(*g_callBackPtrComp)(); /* another method to call the function using pointer to function g_callBackPtr(); */
+		(*g_callBackPtr)(); /* another method to call the function using pointer to function g_callBackPtr(); */
 	}
 }
 
@@ -70,7 +69,6 @@ void TIMER0_init(const Timer0_ConfigType * Config_Ptr){
 		/*Disable Force Compare Mode*/
 		CLEAR_BIT(TCCR0,FOC0);
 		OCR0 = Config_Ptr -> dutyCycle;
-
 	}
 
 	/*Select Mode of Operation*/
@@ -90,21 +88,16 @@ void TIMER0_init(const Timer0_ConfigType * Config_Ptr){
 			(Config_Ptr -> clock & NUM_TO_CLEAR_LAST_5_BITS);
 
 	if(Config_Ptr -> oc0Mode != OC0_DISCONNECT){
-		/*Set OC0 pin as output*/
+		/*Disable Interrupt*/
 		CLEAR_BIT(TIMSK,OCIE0);
 		/*Set OC0 as output pin*/
 		SET_BIT(DDRB,PB3);
 	}
 }
 
-void TIMER0_setCallBack(void(*a_ptr)(void),Timer0_ModeOfOperation mode){
+void TIMER0_setCallBack(void(*a_ptr)(void)){
 	/* Save the address of the Call back function in a global variable */
-	switch (mode){
-	case TIMER0_OVF:
-		g_callBackPtrOvf = a_ptr;
-		break;
-	case TIMER0_CTC:
-		g_callBackPtrComp = a_ptr;
+		g_callBackPtr = a_ptr;
 	}
 }
 
@@ -114,7 +107,7 @@ void TIMER0_deInit(void){
 	CLEAR_BIT(TIMSK,OCIE0);
 }
 
-void TIMER0_startCount(const Timer0_Clock a_clock){
+void TIMER0_startCount(uint8 duration , const Timer0_Clock a_clock){
 	TCCR0 = (TCCR0 & NUM_TO_CLEAR_FIRST_3_BITS) |\
 			(a_clock & NUM_TO_CLEAR_LAST_5_BITS);
 }
