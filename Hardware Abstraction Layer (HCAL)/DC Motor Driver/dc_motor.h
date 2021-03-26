@@ -14,7 +14,6 @@
 #include "std_types.h"
 #include "common_macros.h"
 #include "micro_config.h"
-#include "timer0.h"
 
 /* ----------------------------------------------------------------------------
  *                         Timer Stucture Definition                          *
